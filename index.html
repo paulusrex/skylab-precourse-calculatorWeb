@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="./style.css">
+  <title>Calculator</title>
+</head>
+<body>
+  <div>
+    <div class="calculator">
+      <div id="displaySecondary">
+        <div id="previousDisplay">prev</div>
+        <div id="currentOperation">+</div>
+        <div id="resultFlag">result</div>
+      </div>
+      <div id="display">0</div>
+      <div class="op" onclick="clickUnaryOp('C');"><p>CE</p></div>
+      <div class="op" onclick="clickUnaryOp('C');"><p>C</p></div>
+      <div class="op" onclick="clickUnaryOp('+-');"><p>+-</p></div>
+      <div class="op" onclick="clickUnaryOp('backspace');"><p>Borrar</p></div>
+      <div class="figure" onclick="clickFigure('7')"><p>7</p></div>
+      <div class="figure" onclick="clickFigure('8')"><p>8</p></div>
+      <div class="figure" onclick="clickFigure('9')"><p>9</p></div>
+      <div class="op" onclick="clickBinaryOp('/')"><p>/</p></div>
+      <div class="figure" onclick="clickFigure('4')"><p>4</p></div>
+      <div class="figure" onclick="clickFigure('5')"><p>5</p></div>
+      <div class="figure" onclick="clickFigure('6')"><p>6</p></div>
+      <div class="op" onclick="clickBinaryOp('*')"><p>*</p></div>
+      <div class="figure" onclick="clickFigure('1')"><p>1</p></div>
+      <div class="figure" onclick="clickFigure('2')"><p>2</p></div>
+      <div class="figure" onclick="clickFigure('3')"><p>3</p></div>
+      <div class="op" onclick="clickBinaryOp('-')"><p>-</p></div>
+      <div class="figure" onclick="clickFigure('.')"><p>.</p></div>
+      <div class="figure" onclick="clickFigure('0')" id="zero"><p>0</p></div>
+      <div class="op" onclick="clickUnaryOp('=');"><p>=</p></div>
+      <div class="op" onclick="clickBinaryOp('+')"><p>+</p></div>
+    </div>    
+  </div>
+
+  <script src="./app.js"></script>
+
+</body>
+</html>
