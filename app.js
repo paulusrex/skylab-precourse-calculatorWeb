@@ -3,6 +3,7 @@ const htmlCurrentOperation = document.getElementById('currentOperation');
 const htmlResultFlag = document.getElementById('resultFlag');
 const htmlDisplay = document.getElementById('display');
 
+const maxDisplayLength = 9;
 let currentOperation = '';
 let previousValue = null;
 let displayString = '0';
@@ -16,12 +17,30 @@ const displayValue = () => {
 }
 
 function setDisplayValue (value) {
-  displayString = `${value}`;
+  displayString = `${value}`.slice(0, maxDisplayLength);
 }
 
 function setCurrentOperation(op) {
   currentOperation = op;
-  htmlCurrentOperation.innerHTML = op;  
+  let fontawesomeOperationIcon;
+  switch (op) {
+    case '+':
+      fontawesomeOperationIcon = '<i class="fas fa-plus"></i>';
+      break;
+    case '-':
+      fontawesomeOperationIcon = '<i class="fas fa-minus"></i>';
+      break;
+    case '*':
+      fontawesomeOperationIcon = '<i class="fas fa-times"></i>';
+      break;
+    case '/':
+      fontawesomeOperationIcon = '<i class="fas fa-divide"></i>';
+      break;
+    default:
+      fontawesomeOperationIcon = '';
+      break;
+  }
+  htmlCurrentOperation.innerHTML = fontawesomeOperationIcon;  
   if (op === '') {
     htmlPreviousDisplay.innerHTML = '';
     document.getElementById
@@ -38,22 +57,64 @@ function refreshDisplay() {
   htmlDisplay.innerHTML = displayString;
 }
 
-function clickFigure(figure) {  
+function keypress(event) {
+  let char = String.fromCharCode(event.charCode);
+  switch (char){
+    case '+':
+    case '-':
+    case '*':
+    case '/':
+      clickBinaryOp(char);
+      break;
+    case '.':
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+      clickFigure(char);
+      break;
+    default:
+      break;
+  }
+}
+
+function keydown(event) {
+  if (event.keyCode === 13) {
+    clickUnaryOp('=');
+  } else if (event.keyCode === 8) {
+    clickUnaryOp('backspace');
+  } else if (event.keyCode === 27) {
+    clickUnaryOp('C');
+  }
+}
+
+function clickFigure(figure) {
+  htmlResultFlag.style.backgroundColor = "";
   if (figure === '.') {
     if (!displayHasDecimalPart()) {
       displayString += '.';
     }
   } else {
-    if (displayString === '0') {
+    if (displayString === '0' || Number.isNaN(displayValue())) {
       displayString = figure;
     } else {
       displayString += figure;
     }
   }
-  refreshDisplay();
+  displayString = displayString.slice(0, maxDisplayLength);
+  refreshDisplay();  
 }
 
 function clickBinaryOp(op) {
+  if (Number.isNaN(displayValue())) {
+    return;
+  }
   if (currentOperation !== '') {
     resolve();
   }
@@ -81,12 +142,18 @@ function resolve() {
         result = previousValue + displayValue();
       }
       break;
+    default:
+      result = displayValue();
+      break;
   }
   setDisplayValue(result);
   setCurrentOperation('');
 }
 
 function clickUnaryOp(op) {
+  if (Number.isNaN(displayValue())) {
+    displayString = '0';
+  }
   switch (op) {
     case 'CE':
       displayString = '0';
@@ -94,7 +161,7 @@ function clickUnaryOp(op) {
       break;      
     case 'C':
       displayString = '0';
-      currentOperation = '';
+      setCurrentOperation('');
       refreshDisplay();
       break;
     case '+-':
@@ -112,5 +179,18 @@ function clickUnaryOp(op) {
       resolve();
       refreshDisplay();
       break;
+    case "sqrt":
+      setDisplayValue(Math.sqrt(displayValue()));
+      refreshDisplay();
+      break;
+    case "^2":
+      setDisplayValue(Math.pow(displayValue(), 2));
+      refreshDisplay();
+      break;      
+    case "%":
+      resolve();
+      setDisplayValue(displayValue() / 100);
+      refreshDisplay();
+      break;        
   }
 }
