@@ -1,86 +1,29 @@
-const htmlPreviousDisplay = document.getElementById('previousDisplay');
-const htmlCurrentOperation = document.getElementById('currentOperation');
-const htmlResultFlag = document.getElementById('resultFlag');
-const htmlDisplay = document.getElementById('display');
-
 const maxDisplayLength = 9;
 let currentOperation = '';
 let previousValue = null;
 let displayString = '0';
-const displayHasDecimalPart = () => displayString.includes('.');
-const displayValue = () => {
-  if (displayHasDecimalPart()) {
-    return Number.parseFloat(displayString);
-  } else {
-    return Number.parseInt(displayString);
-  }
-}
+const displayValue = () => (displayString.includes('.') ? Number.parseFloat(displayString) : Number.parseInt(displayString));
 
 function setDisplayValue (value) {
-  displayString = `${value}`.slice(0, maxDisplayLength);
+  displayString = `${value}`;
+  displayString = (displayString.length > maxDisplayLength && !displayString.includes('.')) ? 'overflow' : displayString.slice(0, maxDisplayLength);
 }
 
 function setCurrentOperation(op) {
   currentOperation = op;
-  let fontawesomeOperationIcon;
-  switch (op) {
-    case '+':
-      fontawesomeOperationIcon = '<i class="fas fa-plus"></i>';
-      break;
-    case '-':
-      fontawesomeOperationIcon = '<i class="fas fa-minus"></i>';
-      break;
-    case '*':
-      fontawesomeOperationIcon = '<i class="fas fa-times"></i>';
-      break;
-    case '/':
-      fontawesomeOperationIcon = '<i class="fas fa-divide"></i>';
-      break;
-    default:
-      fontawesomeOperationIcon = '';
-      break;
-  }
-  htmlCurrentOperation.innerHTML = fontawesomeOperationIcon;  
-  if (op === '') {
-    htmlPreviousDisplay.innerHTML = '';
-    document.getElementById
-    htmlCurrentOperation.style.backgroundColor = "";
-    htmlResultFlag.style.backgroundColor = "#00ee00";
-  } else { 
-    htmlPreviousDisplay.innerHTML = `${previousValue} ${op}`;
-    htmlCurrentOperation.style.backgroundColor = "#00ee00";
-    htmlResultFlag.style.backgroundColor = "";
-  } 
-}
-
-function refreshDisplay() {
-  htmlDisplay.innerHTML = displayString;
+  const faIcon = {'+': 'fa-plus','-':'fa-minus', '*': 'fa-times', '/': 'fa-divide'};
+  document.getElementById('previousDisplay').innerHTML = (op === '') ? '' : `${previousValue} ${op}`;
+  document.getElementById('currentOperation').innerHTML = (op === '') ? '' : `<i class="fas ${faIcon[op]}"></i>`;
+  document.getElementById('currentOperation').style.backgroundColor = (op === '') ? '' : '#00ee00';
+  document.getElementById('resultFlag').style.backgroundColor = (op === '') ? '#00ee00' : '';
 }
 
 function keypress(event) {
   let char = String.fromCharCode(event.charCode);
-  switch (char){
-    case '+':
-    case '-':
-    case '*':
-    case '/':
-      clickBinaryOp(char);
-      break;
-    case '.':
-    case '0':
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
-      clickFigure(char);
-      break;
-    default:
-      break;
+  if (/[+\-*/]/.test(char)) {
+    clickBinaryOp(char);
+  } else if (/[\d\.]/.test(char)) {
+    clickFigure(char);
   }
 }
 
@@ -95,20 +38,13 @@ function keydown(event) {
 }
 
 function clickFigure(figure) {
-  htmlResultFlag.style.backgroundColor = "";
-  if (figure === '.') {
-    if (!displayHasDecimalPart()) {
-      displayString += '.';
-    }
-  } else {
-    if (displayString === '0' || Number.isNaN(displayValue())) {
-      displayString = figure;
-    } else {
-      displayString += figure;
-    }
-  }
-  displayString = displayString.slice(0, maxDisplayLength);
-  refreshDisplay();  
+  displayString = Number.isNaN(displayValue()) ? '' : displayString;
+  displayString = displayString === '0' ? '' : displayString;
+  figure = (figure === '.' && displayString.includes('.')) ? '' : figure;
+  displayString += figure;
+  displayString = (displayString === '.') ? '0.' : displayString.slice(0, maxDisplayLength);
+  document.getElementById('resultFlag').style.backgroundColor = "";
+  document.getElementById('display').innerHTML = displayString;
 }
 
 function clickBinaryOp(op) {
@@ -124,11 +60,11 @@ function clickBinaryOp(op) {
 }
 
 function resolve() {
-  let result;
+  let result = displayValue();
   switch (currentOperation){
     case '+':
       result = previousValue + displayValue();
-      break;    
+      break;
     case '-':
       result = previousValue - displayValue();
       break;    
@@ -136,14 +72,7 @@ function resolve() {
       result = previousValue * displayValue();
       break;
     case '/':
-      if (displayValue() === 0) {
-
-      } else {
-        result = previousValue + displayValue();
-      }
-      break;
-    default:
-      result = displayValue();
+      result = previousValue / displayValue();
       break;
   }
   setDisplayValue(result);
@@ -151,46 +80,33 @@ function resolve() {
 }
 
 function clickUnaryOp(op) {
-  if (Number.isNaN(displayValue())) {
-    displayString = '0';
-  }
+  displayString = Number.isNaN(displayValue()) ? '0' : displayString;
   switch (op) {
+    case 'C':
+      setCurrentOperation('');
     case 'CE':
       displayString = '0';
-      refreshDisplay();
-      break;      
-    case 'C':
-      displayString = '0';
-      setCurrentOperation('');
-      refreshDisplay();
       break;
     case '+-':
       setDisplayValue(-displayValue());
-      refreshDisplay();
       break;
     case 'backspace':      
       displayString = displayString.length === 1 ? '0' : displayString.slice(0,displayString.length-1);
-      if (displayString === '-') {
-        displayString = '0';
-      }
-      refreshDisplay();
-      break;
-    case "=":
-      resolve();
-      refreshDisplay();
+      displayString = (displayString === '-') ? '0' : displayString;
       break;
     case "sqrt":
       setDisplayValue(Math.sqrt(displayValue()));
-      refreshDisplay();
       break;
     case "^2":
       setDisplayValue(Math.pow(displayValue(), 2));
-      refreshDisplay();
-      break;      
+      break;
+    case "=":
+      resolve();
+      break;       
     case "%":
       resolve();
       setDisplayValue(displayValue() / 100);
-      refreshDisplay();
       break;        
   }
+  document.getElementById('display').innerHTML = displayString;
 }
